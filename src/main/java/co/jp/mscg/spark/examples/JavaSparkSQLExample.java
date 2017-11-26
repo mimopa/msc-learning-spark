@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
@@ -116,5 +117,21 @@ public class JavaSparkSQLExample {
 		peopleDS.show();
 
 
+	}
+
+	private static void runInferSchemaExample(SparkSession spark) {
+		// Create an RDD of Person objects from a text file
+		JavaRDD<Person> peopleRDD = spark.read()
+				.textFile("./data/people.txt")
+				.javaRDD()
+				.map(line -> {
+					String[] parts = line.split(",");
+					Person person = new Person();
+					person.setName(parts[0]);
+					person.setAge(Integer.parseInt(parts[1].trim()));
+					return person;
+				});
+
+		// Apply a schema to an RDD of JavaBeans to get a DataFrame
 	}
 }
