@@ -63,6 +63,7 @@ public class JavaSparkSQLExample {
 	private static void runBasicDataFrameExample(SparkSession spark) throws AnalysisException {
 		Dataset<Row> df = spark.read().json("./data/people.json");
 
+		// 無タイプのデータセット操作（別名、DataFrame操作）
 		// 標準出力に読み込んだコンテンツを表示
 		df.show();
 
@@ -86,11 +87,14 @@ public class JavaSparkSQLExample {
 		// 一時的にpeopleテーブルを作成する
 		df.createOrReplaceTempView("people");
 
+		// プログラム的にSQLクエリを実行
 		Dataset<Row> sqlDF = spark.sql("SELECT * FROM people");
 		sqlDF.show();
 
+		// グローバルテンポラリ ビュー
 		// Register the DataFrame as a blobal tempoorary view
 		// グローバルテンポラリーとしてテーブルを作成することも可能
+		// Sparkアプリケーションが終了するまで保持し全てのセッション共有するテンポラリビューを持てる
 		df.createGlobalTempView("people");
 
 		// Global temporary view is tied to a system preserved database `global_temp`
@@ -103,6 +107,13 @@ public class JavaSparkSQLExample {
 	}
 
 	private static void runDatasetCreationExample(SparkSession spark) {
+
+		// データセットの生成
+		// データセットはRDDに似ていますが、Javaのシリアライズ化あるいはKryoを使う代わりに、ネットワークを超えて処理
+		// あるいは転送するためにオブジェクトをシリアライズ化するために特別なEncoderを使用します。エンコーダーと標準
+		// シリアライズ化のどちらもオブジェクトをバイトに変える責任を持ちますが、エンコーダーは動的に生成されるコード
+		// であり、Sparkがバイトをオブジェクトへデシリアライズ化なしにフィルタリング、ソーティングおよびハッシュ化の
+		// ような多くのオペレーションを実施することができる形式を使用します。
 
 		// Create an instance opf a Bean class
 		Person person = new Person();
@@ -129,6 +140,9 @@ public class JavaSparkSQLExample {
 	}
 
 	private static void runInferSchemaExample(SparkSession spark) {
+
+		// リフレクションを使ったスキーマの推測
+
 		// Create an RDD of Person objects from a text file
 		JavaRDD<Person> peopleRDD = spark.read()
 				.textFile("./data/people.txt")
